@@ -12,7 +12,7 @@ import os
 print("Python version")
 print (sys.version)
 
-print("running pure persuit")
+print("running pure pursuit")
 
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
@@ -31,8 +31,6 @@ import utils_pp
 import utils_viz
 import tf
 
-
-
 # cmd = "rosnode kill /ekf_localization"
 # os.system(cmd)
 
@@ -48,7 +46,7 @@ x_fig = 10
 y_fig = 10 
 
 
-class pure_persuit_node_class:
+class pure_pursuit_node_class:
 	def __init__(self):
 		self.sub_clock = rospy.Subscriber('/clock', Clock, self.callback_clock)
 		self.sub_odom = rospy.Subscriber('/odometry/filtered', Odometry, self.callback_odom)
@@ -63,7 +61,7 @@ class pure_persuit_node_class:
 		self.waypts = np.load("waypts.npy")
 
 		self.markerVisualization_obj = utils_viz.markerVisualization()
-		self.pure_persuit_obj = utils_pp.purePersuit(self.waypts)
+		self.pure_pursuit_obj = utils_pp.purePursuit(self.waypts)
 
 		self.clock_now = 0
 		self.clock_last_motion_update = 0
@@ -98,25 +96,25 @@ class pure_persuit_node_class:
 
 
 
-		# self.pure_persuit_obj.x_pos = data.pose.pose.position.x
-		# self.pure_persuit_obj.y_pos = data.pose.pose.position.y
-		# self.pure_persuit_obj.theta = yaw
+		# self.pure_pursuit_obj.x_pos = data.pose.pose.position.x
+		# self.pure_pursuit_obj.y_pos = data.pose.pose.position.y
+		# self.pure_pursuit_obj.theta = yaw
 		if (self.clock_now - self.clock_last_rviz_update>10):
 			self.markerVisualization_obj.publish_marker_waypts(self.waypts)
 			self.markerVisualization_obj.publish_lines_waypts(self.waypts)
 			self.markerVisualization_obj.publish_marker_robot_pose(data.pose.pose)
-			self.markerVisualization_obj.publish_marker_lookahead_circle(data.pose.pose, self.pure_persuit_obj.lookahead)
-			self.markerVisualization_obj.publish_marker_goal(self.pure_persuit_obj.pg)
-			self.markerVisualization_obj.publish_marker_pts_curv(self.waypts,self.pure_persuit_obj.waypts_curvature)
+			self.markerVisualization_obj.publish_marker_lookahead_circle(data.pose.pose, self.pure_pursuit_obj.lookahead)
+			self.markerVisualization_obj.publish_marker_goal(self.pure_pursuit_obj.pg)
+			self.markerVisualization_obj.publish_marker_pts_curv(self.waypts,self.pure_pursuit_obj.waypts_curvature)
 			self.clock_last_rviz_update = self.clock_now
 
 		if (self.clock_now - self.clock_last_motion_update>10):
 			robot_pose = data.pose.pose.position
-			self.pure_persuit_obj.update_pos(robot_pose.x, robot_pose.y, yaw)
-			self.pure_persuit_obj.find_lookahead_pt()
-			self.pure_persuit_obj.find_curvature()
-			x_vel, ang_vel = self.pure_persuit_obj.motion_update()
-			self.pure_persuit_obj.check_reset()
+			self.pure_pursuit_obj.update_pos(robot_pose.x, robot_pose.y, yaw)
+			self.pure_pursuit_obj.find_lookahead_pt()
+			self.pure_pursuit_obj.find_curvature()
+			x_vel, ang_vel = self.pure_pursuit_obj.motion_update()
+			self.pure_pursuit_obj.check_reset()
 			# print(x_vel, ang_vel)
 
 
@@ -131,14 +129,8 @@ class pure_persuit_node_class:
 			twist.angular.z = ang_vel
 
 			self.pub_cmd_vel.publish(twist)
-			self.pub_curvature.publish(self.pure_persuit_obj.curvature)
+			self.pub_curvature.publish(self.pure_pursuit_obj.curvature)
 			self.clock_last_motion_update = self.clock_now
-
-
-
-
-
-
 
 	# def callback_gazebo_link_states(self, data):
 	# 	# print("hello")
@@ -169,17 +161,15 @@ class pure_persuit_node_class:
 		# r_quaternion_list = [r_quat_ros.x, r_quat_ros.y, r_quat_ros.z, r_quat_ros.w]
 		# (roll, pitch, yaw) = euler_from_quaternion(r_quaternion_list)
 
-
-
 		# self.markerVisualization_obj.publish_marker_waypts(self.waypts)
 		# self.markerVisualization_obj.publish_lines_waypts(self.waypts)
 		# self.markerVisualization_obj.publish_marker_robot_pose(odom.pose.pose)
-		# self.markerVisualization_obj.publish_marker_lookahead(odom.pose.pose, self.pure_persuit_obj.lookahead)
+		# self.markerVisualization_obj.publish_marker_lookahead(odom.pose.pose, self.pure_pursuit_obj.lookahead)
 
 
 # def send_cmd_vel():
 # 	pub = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
-# 	rospy.init_node('pure_persuit')
+# 	rospy.init_node('pure_pursuit')
 # 	rate = rospy.Rate(10) # 10hz
 
 # 	while not rospy.is_shutdown():
@@ -208,10 +198,9 @@ if __name__=="__main__":
 
 	try:
 		# send_cmd_vel()	
-		rospy.init_node('pure_persuit_node')
-		pure_persuit_node_obj = pure_persuit_node_class()
+		rospy.init_node('pure_pursuit_node')
+		pure_pursuit_node_obj = pure_pursuit_node_class()
 		rospy.spin()
-
 
 	except rospy.ROSInterruptException:
 		pass

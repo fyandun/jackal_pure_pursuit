@@ -5,10 +5,10 @@ It launches a visual interface that allows to click for setting the waypoints.
 
 For running the simulation, source your catkin_ws and do:
 ```
-roslaunch pure_persuit jackal_world_fy.launch
+roslaunch pure_pursuit jackal_world_fy.launch
 ```
 
 For running the actual controller cd into the /src folder and do:
 ```
-python pure_persuit.py
+python pure_pursuit.py
 ```

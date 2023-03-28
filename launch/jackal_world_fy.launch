@@ -2,7 +2,7 @@
   <arg name="use_sim_time" default="true" />
   <arg name="gui" default="true" />
   <arg name="headless" default="false" />
-  <arg name="world_name" default="$(find pure_persuit)/worlds/vineyard.world" />
+  <arg name="world_name" default="$(find pure_pursuit)/worlds/vineyard.world" />
   <!--arg name="world_name" default="$(find jackal_gazebo)/worlds/empty.world" /-->
 
   <!-- Short-term hack to support the original front_laser:=true argument for spawning

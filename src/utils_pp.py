@@ -15,11 +15,8 @@ def collectPts(num, x_world, y_world, x_fig, y_fig):
 	waypts = waypts.round(4)
 	np.save("waypts", waypts)
 	plt.close()
-	
 
-
-class purePersuit():
-
+class PurePursuit():
 
 	def __init__(self,waypts):
 
@@ -51,7 +48,7 @@ class purePersuit():
 		self.ang_vel = 0
 		self.ang_vel_thresh = 2
 
-		self.bot_width =0.4
+		self.bot_width = 0.4
 
 		self.x_navPath = []
 		self.y_navPath = []

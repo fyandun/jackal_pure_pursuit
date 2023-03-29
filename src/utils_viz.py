@@ -61,10 +61,6 @@ class markerVisualization():
 		# self.rate.sleep()
 
 
-
-
-
-
 	def publish_lines_waypts(self, waypoints):
 
 		markers_array_msg = MarkerArray()
@@ -100,9 +96,6 @@ class markerVisualization():
 		# self.rate.sleep()
 
 
-
-
-
 	def publish_marker_robot_pose(self, robot_pose):
 
 		markers_array_msg = MarkerArray()
@@ -132,7 +125,6 @@ class markerVisualization():
 		markers_array_msg.markers = markers_array
 		self.pub_marker_robot_pose.publish(markers_array_msg)
 		# self.rate.sleep()
-
 
 
 	def publish_marker_lookahead_circle(self, robot_pose, lookahead):
@@ -166,8 +158,6 @@ class markerVisualization():
 		# self.rate.sleep()
 
 
-
-
 	def publish_marker_goal(self, pg):
 
 		markers_array_msg = MarkerArray()
@@ -198,7 +188,6 @@ class markerVisualization():
 		marker.pose.orientation.z = 0.0
 		marker.pose.orientation.w = 1.0
 
-		
 		marker.lifetime = rospy.Duration(0)
 		markers_array.append(marker)
 
@@ -213,8 +202,6 @@ class markerVisualization():
 		markers_array = []
 
 		for i in range(0,waypoints.shape[0]):
-			# pass
-			# print(waypoint)
 			waypoint = waypoints[i]
 			marker = Marker()
 			marker.ns = "waypoints_curvature"

@@ -1,0 +1,2 @@
+waypoints_path: '/home/rohan/projects/src/jackal_pure_pursuit/src/waypts.npy'
+lookahead: 1.5

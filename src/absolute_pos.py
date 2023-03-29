@@ -4,7 +4,6 @@ import numpy as np
 from gazebo_msgs.msg import LinkStates
 from geometry_msgs.msg import Pose, Twist
 import rospy
-#sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import tf
 
 class AbsPosPub:

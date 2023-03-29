@@ -40,12 +40,13 @@ class pure_pursuit_node_class:
 		self.waypoint_path = rospy.get_param('/waypoints_path','waypts.npy')
 		self.waypts = np.load(self.waypoint_path)
 
-		rospy.loginfo_once(f'Initialized Pure Pursuit Controller with {self.waypts.shape[0]} waypoints')
-
 		self.markerVisualization_obj = utils_viz.markerVisualization()
 
 		lookahead_dist = rospy.get_param('/lookahead',1.5)
 		self.ppc = PurePursuitController(self.waypts, lookahead_dist)
+
+		rospy.loginfo_once(f'Initialized Pure Pursuit Controller with {self.waypts.shape[0]} waypoints and lookahead distance {self.ppc.lookahead}')
+
 
 		self.clock_now = 0
 		self.clock_last_motion_update = 0

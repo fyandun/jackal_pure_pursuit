@@ -45,7 +45,7 @@ next = False
 class Goal_reacher:
 	def __init__(self):
 		self.robot_position = None
- 		self.curr_time = Clock()
+		self.curr_time = Clock()
 		self.sub = rospy.Subscriber('/odometry/filtered', Odometry, self.callback)
 		self.sub2 = rospy.Subscriber('/clock', Clock, self.callback2 )
 		#self.sub3 = rospy.Subscriber('move_base/status', GoalStatusArray, self.callback3)
@@ -95,21 +95,20 @@ class Goal_reacher:
 		
 
 if __name__ == "__main__":
-	
 	gr = Goal_reacher()
 	rospy.init_node('goal_reacher', anonymous=True)
 	while True:
-            x = input('Save_point?')
-            if x=='y':
-               c = np.loadtxt('test.csv',delimiter=',')
-               print(c)
-               if(len(c) == 0):
-                 print(gr.robot_position)
-                 np.savetxt('test.csv',[gr.robot_position],delimiter=',')
-               else:
-                 print('position ',gr.robot_position)
-                 print('here')
-                 np.savetxt('test.csv',np.vstack([c,gr.robot_position]),delimiter=',')
+		x = input('Save_point?')
+		if x == 'y':
+			c = np.loadtxt('test.csv',delimiter=',')
+			print(c)
+			if(len(c) == 0):
+				print(gr.robot_position)
+				np.savetxt('test.csv',[gr.robot_position],delimiter=',')
+			else:
+				print('position ',gr.robot_position)
+				print('here')
+				np.savetxt('test.csv',np.vstack([c,gr.robot_position[:2]]),delimiter=',')
 
 	print(rospy.get_time())
 	rospy.spin()

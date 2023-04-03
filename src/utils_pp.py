@@ -170,7 +170,7 @@ class PurePursuitController():
 		side = sign_pos[0]*np.sin(self.theta) - sign_pos[1]*np.cos(self.theta)
 		side = np.sign(side)
 
-		self.curvature = 2*N/np.square(self.lookahead)*side*-1
+		self.curvature = 2*N/np.square(self.lookahead)*side
 
 	def motion_update(self):		
 		# upcoming_pt = int(np.ceil(self.running_index))

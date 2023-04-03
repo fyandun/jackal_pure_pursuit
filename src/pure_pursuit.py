@@ -47,7 +47,6 @@ class pure_pursuit_node_class:
 
 		#rospy.loginfo_once(f'Initialized Pure Pursuit Controller with {self.waypts.shape[0]} waypoints and lookahead distance {self.ppc.lookahead}')
 
-
 		self.clock_now = 0
 		self.clock_last_motion_update = 0
 		self.clock_last_rviz_update = 0
@@ -74,10 +73,15 @@ class pure_pursuit_node_class:
 		# 	self.clock_last_rviz_update = self.clock_now
 
 		#if (self.clock_now - self.clock_last_motion_update > 10):
+		print('=================== ODOM CALLBACK START ==================')
 		self.ppc.update_pos(robot_pose.x, robot_pose.y, yaw)
+		print('x: ', robot_pose.x, ' y: ', robot_pose.y, ' yaw: ', yaw)
 		self.ppc.find_lookahead_pt()
+		print('Lookahead point: ', self.ppc.pg)
 		self.ppc.find_curvature()
+		print('Curvature: ', self.ppc.curvature)
 		x_vel, ang_vel = self.ppc.motion_update()
+		print('Cmd vel lin x: ', x_vel, 'Cmd vel ang z: ', ang_vel)
 		self.ppc.check_reset()
 
 			# twist = Twist(
@@ -92,6 +96,7 @@ class pure_pursuit_node_class:
 		self.pub_cmd_vel.publish(twist)
 			# self.pub_curvature.publish(self.ppc.curvature)
 		self.clock_last_motion_update = self.clock_now
+		print('=================== ODOM CALLBACK END ==================')
 
 
 if __name__ == '__main__':

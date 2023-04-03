@@ -32,6 +32,8 @@ if __name__ == '__main__':
 
     
     fix, (ax1, ax2) = plt.subplots(1,2)
+    ax1.plot(odom[:,0], label='x')
+    ax1.plot(odom[:,1], label='y')
     ax1.plot(odom[:,2], label='yaw1')
     ax1.plot(odom[:,3], label='yaw2')
     ax1.legend()

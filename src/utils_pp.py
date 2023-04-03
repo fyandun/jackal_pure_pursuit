@@ -180,7 +180,6 @@ class PurePursuitController():
 		vel_decay = np.absolute(tmp_curv)
 		vel_decay = 0.5 + (1-vel_decay)*0.5
 
-		self.ang_vel = self.target_vel*self.curvature
 		self.ang_vel = self.target_vel*self.curvature*vel_decay
 
 		# self.theta = self.theta + self.ang_vel*self.dt
@@ -200,5 +199,6 @@ class PurePursuitController():
 			self.pg = self.waypts[0]
 			self.index = 0
 			self.running_index = 0
+			print('>>>>>>>>>>>>>>>>>>TRIGGERED RESET')
 
 

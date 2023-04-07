@@ -68,7 +68,7 @@ class pure_pursuit_node_class:
 		# 	self.markerVisualization_obj.publish_lines_waypts(self.waypts)
 		# 	self.markerVisualization_obj.publish_marker_robot_pose(data.pose.pose)
 		# 	self.markerVisualization_obj.publish_marker_lookahead_circle(data.pose.pose, self.ppc.lookahead)
-		# 	self.markerVisualization_obj.publish_marker_goal(self.ppc.pg)
+		# 	self.markerVisualization_obj.publish_marker_goal(self.ppc.cur_goal_point)
 		# 	self.markerVisualization_obj.publish_marker_pts_curv(self.waypts,self.ppc.waypts_curvature)
 		# 	self.clock_last_rviz_update = self.clock_now
 
@@ -77,7 +77,7 @@ class pure_pursuit_node_class:
 		self.ppc.update_pos(robot_pose.x, robot_pose.y, yaw)
 		print('x: ', robot_pose.x, ' y: ', robot_pose.y, ' yaw: ', yaw)
 		self.ppc.find_lookahead_pt()
-		print('Lookahead point: ', self.ppc.pg)
+		print('Lookahead point: ', self.ppc.cur_goal_point)
 		self.ppc.find_curvature()
 		print('Curvature: ', self.ppc.curvature)
 		x_vel, ang_vel = self.ppc.motion_update()

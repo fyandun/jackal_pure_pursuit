@@ -44,9 +44,11 @@ goals = [
 next = False
 class Goal_reacher:
 	def __init__(self):
-		self.robot_position = None
+		self.robot_position_odom = None
+		self.robot_position_gps = None
 		self.curr_time = Clock()
 		self.sub = rospy.Subscriber('/odometry/filtered', Odometry, self.callback)
+		self.sub1 = rospy.Subscriber('/odom', Odometry, self.callback1)
 		self.sub2 = rospy.Subscriber('/clock', Clock, self.callback2 )
 		#self.sub3 = rospy.Subscriber('move_base/status', GoalStatusArray, self.callback3)
 	
@@ -65,7 +67,12 @@ class Goal_reacher:
 			self.stamp_old = stamp
 			
 	def callback(self, data):
-		self.robot_position = [data.pose.pose.position.x, data.pose.pose.position.y,0,0,data.pose.pose.orientation.z, data.pose.pose.orientation.w]
+		self.robot_position_odom.append([data.pose.pose.position.x, data.pose.pose.position.y])#,0,0,data.pose.pose.orientation.z, data.pose.pose.orientation.w]
+	
+	def callback1(self, data):
+		# Confusing, but the new GPS driver publishes to /odom, not /gps/rtkfix
+		self.robot_position_gps.append([data.pose.pose.position.x, data.pose.pose.position.y])#,0,0,data.pose.pose.orientation.z, data.pose.pose.orientation.w]
+	
 	def callback2(self, data):
 		self.curr_time = data
         
@@ -74,7 +81,7 @@ class Goal_reacher:
 		g = self.i%len(goals)
 		goal = goals[g]
 		pub_goal = PoseStamped()
-		print(goal, gr.robot_position, gr.curr_time)
+		print(goal, gr.robot_position_odom, gr.curr_time)
 		pub_goal.header.frame_id = 'odom'
 		pub_goal.header.seq = 0
 		#pub_goal.header.stamp.secs = gr.curr_time.clock.secs
@@ -95,20 +102,39 @@ class Goal_reacher:
 		
 
 if __name__ == "__main__":
+
+	f1 = 'points_odom.txt'
+	f2 = 'points_gps.txt'
+
+	mode = 'capture'
+	subsample_rate = 20
+
 	gr = Goal_reacher()
 	rospy.init_node('goal_reacher', anonymous=True)
-	while True:
-		x = input('Save_point?')
-		if x == 'y':
-			c = np.loadtxt('test.csv',delimiter=',')
-			print(c)
-			if(len(c) == 0):
-				print(gr.robot_position)
-				np.savetxt('test.csv',[gr.robot_position],delimiter=',')
-			else:
-				print('position ',gr.robot_position)
-				print('here')
-				np.savetxt('test.csv',np.vstack([c,gr.robot_position[:2]]),delimiter=',')
+	if mode == 'capture':
+		while True:
+			x = input('Save_point?')
+			if x == 'y':
+				c1 = np.loadtxt(f1,delimiter=',')
+				c2 = np.loadtxt(f2,delimiter=',')
+				if(len(c1) == 0):
+					np.savetxt(f1,[gr.robot_position_odom[-1]],delimiter=',')
+					np.savetxt(f2,[gr.robot_position_gps[-1]],delimiter=',')
+				else:
+					np.savetxt(f1,np.vstack([c1,gr.robot_position_odom[-1]]),delimiter=',')
+					np.savetxt(f2,np.vstack([c2,gr.robot_position_gps[-1]]),delimiter=',')
 
-	print(rospy.get_time())
+				print(c1)
+	else:
+		while True:
+			x = input('Done?: ')
+			if x == 'y':
+				break
+
+		ekf = np.stack(gr.robot_position_odom)[::subsample_rate]
+		gps = np.stack(gr.robot_position_gps)[::subsample_rate]
+		np.savetxt(f1, ekf)
+		np.savetxt(f2, gps)
+		print('Saved subsampled trajectories')
+	
 	rospy.spin()

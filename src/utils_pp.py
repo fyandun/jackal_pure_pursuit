@@ -38,7 +38,7 @@ class PurePursuitController():
 		self.x_head_pos = 0
 		self.y_head_pos = 0
 
-		self.pg = self.waypts[0]
+		self.cur_goal_point = self.waypts[0]
 		self.arc_c = self.waypts[0]
 		self.curvature = 0
 
@@ -129,43 +129,38 @@ class PurePursuitController():
 		return self.waypts[self.index]
 
 	def find_lookahead_pt(self):
-		if not self.reset_flag:
-			tmp_index = int(np.floor(self.running_index))
-			if (tmp_index + 1 < self.num_waypts):
-
-				for i in range(self.num_waypts-1):
-					if (tmp_index + 1 >= self.num_waypts):
-						break
-
-					path = self.waypts[tmp_index+1] - self.waypts[tmp_index]
-					pc = self.waypts[tmp_index] - self.xy_pos()
-
-					a = np.dot(path,path)
-					b = 2*(np.dot(path,pc))
-					c = np.dot(pc,pc) - np.square(self.lookahead)
-
-					t = np.roots([a,b,c])
-					t = np.max(t)
-					if ((t <= 1) and (t >= 0) and np.isreal(t) and (tmp_index + t > self.running_index)):
-						self.pg = self.waypts[tmp_index] + t*path
-						self.running_index = tmp_index+t
-						break
-					tmp_index += 1
-		else:
-			self.pg = self.waypts[0]
-			if self.calculate_dist(self.waypts[0])<0.5:
+		if self.reset_flag:
+			self.cur_goal_point = self.waypts[0]
+			if self.calculate_dist(self.waypts[0]) < 0.5:
 				self.reset_flag = False
+			return self.cur_goal_point
 
-		return self.pg
+		tmp_index = int(np.floor(self.running_index))
+		while tmp_index + 1 < self.num_waypts:
+			path = self.waypts[tmp_index+1] - self.waypts[tmp_index]
+			pc = self.waypts[tmp_index] - self.xy_pos()
+
+			a = np.dot(path,path)
+			b = 2*(np.dot(path,pc))
+			c = np.dot(pc,pc) - np.square(self.lookahead)
+
+			t = np.max(np.roots([a,b,c]))
+			if ((t <= 1) and (t >= 0) and np.isreal(t) and (tmp_index + t > self.running_index)):
+				self.cur_goal_point = self.waypts[tmp_index] + t*path
+				self.running_index = tmp_index+t
+				break
+			tmp_index += 1
+
+		return self.cur_goal_point
 
 	def find_curvature(self):
 		a = -np.tan(self.theta)
 		b = 1
 		c = self.x_pos*np.tan(self.theta) - self.y_pos
 
-		N = abs(a*self.pg[0] + b*self.pg[1] + c)/np.sqrt(np.square(a)+np.square(b))
+		N = abs(a*self.cur_goal_point[0] + b*self.cur_goal_point[1] + c)/np.sqrt(np.square(a)+np.square(b))
 
-		sign_pos = self.pg-self.xy_pos()
+		sign_pos = self.cur_goal_point-self.xy_pos()
 
 		side = sign_pos[0]*np.sin(self.theta) - sign_pos[1]*np.cos(self.theta)
 		side = np.sign(side)
@@ -196,7 +191,7 @@ class PurePursuitController():
 			# self.x_pos = self.pt_pos[0]
 			# self.y_pos = self.pt_pos[1]
 			# self.theta = self.angle_bw_2lines(np.array([self.waypts[0][0]+1,self.waypts[0][1]]),self.waypts[0], self.waypts[1])
-			self.pg = self.waypts[0]
+			self.cur_goal_point = self.waypts[0]
 			self.index = 0
 			self.running_index = 0
 			print('>>>>>>>>>>>>>>>>>>TRIGGERED RESET')

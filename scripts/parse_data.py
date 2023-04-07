@@ -76,6 +76,15 @@ def read_bagfile(bagfile,topics=None):
             data[k] = np.stack(v)
     return data
 
+def plot_odom_vs_gps(bagfile):
+    data = read_bagfile(bagfile,topics=['/odom','/odometry/filtered'])
+
+    _, ax = plt.subplots(1,1)
+    ax.plot(data['/odom'][:,0],data['/odom'][:,1],label='GPS')
+    ax.plot(data['/odometry_filtered'][:,0],data['/odometry/filtered'][:,1],label='EKF')
+    plt.legend()
+    plt.show()
+
 if __name__ == '__main__':
     # bag = rosbag.Bag('../data/pure_pursuit.bag')
 

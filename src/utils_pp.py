@@ -20,6 +20,15 @@ def collectPts(num, x_world, y_world, x_fig, y_fig):
 def dist(u,v):
 	return np.sqrt((u[0]-v[0])**2 + (u[1]-v[1])**2)
 
+def unit_vector(v):
+	return v/np.linalg.norm(v)
+
+def angle_bw_vectors(u,v):
+	u = unit_vector(u)
+	v = unit_vector(v)
+	return np.arccos(np.dot(u,v))
+	
+
 class PurePursuitController():
 
 	def __init__(self,waypts,lookahead):
@@ -35,12 +44,14 @@ class PurePursuitController():
 		self.x_pos = self.pt_pos[0]
 		self.y_pos = self.pt_pos[1]
 		self.theta = self.angle_bw_2lines(np.array([self.waypts[0][0]+1,self.waypts[0][1]]),self.waypts[0], self.waypts[1])
+		# self.theta = self.angle_bw_2lines(np.array([self.waypts[0][0],self.waypts[0][1]]),self.waypts[0], self.waypts[1])
 		self.x_head_pos = 0
 		self.y_head_pos = 0
 
 		self.cur_goal_point = self.waypts[0]
 		self.arc_c = self.waypts[0]
 		self.curvature = 0
+		self.curvature2 = 0
 
 		self.dt = 0.050
 
@@ -78,7 +89,6 @@ class PurePursuitController():
 			self.waypts_curvature.append(curvature)
 
 		self.waypts_curvature.append(0)
-		print(self.waypts_curvature)
 
 	def calc_curv(self,tx,ty):
 		k = []
@@ -118,6 +128,10 @@ class PurePursuitController():
 
 	def xy_pos(self):
 		return np.array([self.x_pos, self.y_pos])
+	
+	def heading_vector(self):
+		return np.array([np.cos(self.theta), np.sin(self.theta)])
+	
 
 	def find_closest_point(self):
 		min_dist = 9999
@@ -131,7 +145,7 @@ class PurePursuitController():
 	def find_lookahead_pt(self):
 		if self.reset_flag:
 			self.cur_goal_point = self.waypts[0]
-			if self.calculate_dist(self.waypts[0]) < 0.5:
+			if self.calculate_dist(self.waypts[0]) < 1.2:
 				self.reset_flag = False
 			return self.cur_goal_point
 
@@ -167,6 +181,9 @@ class PurePursuitController():
 
 		self.curvature = 2*N/np.square(self.lookahead)*side
 
+		alpha = angle_bw_vectors(self.cur_goal_point-self.xy_pos(), self.heading_vector())
+		self.curvature2 = 2*np.sin(alpha)/self.lookahead*side
+
 	def motion_update(self):		
 		# upcoming_pt = int(np.ceil(self.running_index))
 		# self.target_vel = self.vel*1.00*(1-self.waypts_curvature[upcoming_pt])
@@ -186,7 +203,7 @@ class PurePursuitController():
 		return self.target_vel*vel_decay, self.ang_vel
 
 	def check_reset(self):
-		if (np.linalg.norm(self.xy_pos()-self.waypts[-1])<0.2):
+		if (np.linalg.norm(self.xy_pos()-self.waypts[-1])<0.5):
 			self.reset_flag = True
 			# self.x_pos = self.pt_pos[0]
 			# self.y_pos = self.pt_pos[1]
@@ -194,6 +211,5 @@ class PurePursuitController():
 			self.cur_goal_point = self.waypts[0]
 			self.index = 0
 			self.running_index = 0
-			print('>>>>>>>>>>>>>>>>>>TRIGGERED RESET')
 
 

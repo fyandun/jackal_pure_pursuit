@@ -1,6 +1,6 @@
 <launch>
-  <arg name="default_config" value="$(find pure_pursuit)/config/buggspray_pp.yaml"/>
+  <arg name="default_config" value="$(find pure_pursuit)/config/buggspray.yaml"/>
   <arg name="config" default="$(arg default_config)" />
-  <rosparam file="$(find pure_pursuit)/config/buggspray.yaml" command="load"/>
-  <node name="buggspray_pure_pursuit" pkg="pure_pursuit" type="pure_pursuit.py"/>
+  <rosparam file="$(arg config)" command="load"/>
+  <node name="buggspray_pure_pursuit" pkg="pure_pursuit" type="pure_pursuit.py" output="screen"/>
 </launch>

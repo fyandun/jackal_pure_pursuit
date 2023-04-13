@@ -44,11 +44,11 @@ goals = [
 next = False
 class Goal_reacher:
 	def __init__(self):
-		self.robot_position_odom = None
-		self.robot_position_gps = None
+		self.robot_position_odom = []
+		self.robot_position_gps = []
 		self.curr_time = Clock()
 		self.sub = rospy.Subscriber('/odometry/filtered', Odometry, self.callback)
-		self.sub1 = rospy.Subscriber('/odom', Odometry, self.callback1)
+		# self.sub1 = rospy.Subscriber('/odom', Odometry, self.callback1)
 		self.sub2 = rospy.Subscriber('/clock', Clock, self.callback2 )
 		#self.sub3 = rospy.Subscriber('move_base/status', GoalStatusArray, self.callback3)
 	
@@ -104,10 +104,9 @@ class Goal_reacher:
 if __name__ == "__main__":
 
 	f1 = 'points_odom.txt'
-	f2 = 'points_gps.txt'
 
-	mode = 'capture'
-	subsample_rate = 20
+	mode = 'subsample'
+	subsample_rate = 100
 
 	gr = Goal_reacher()
 	rospy.init_node('goal_reacher', anonymous=True)
@@ -116,13 +115,10 @@ if __name__ == "__main__":
 			x = input('Save_point?')
 			if x == 'y':
 				c1 = np.loadtxt(f1,delimiter=',')
-				c2 = np.loadtxt(f2,delimiter=',')
 				if(len(c1) == 0):
 					np.savetxt(f1,[gr.robot_position_odom[-1]],delimiter=',')
-					np.savetxt(f2,[gr.robot_position_gps[-1]],delimiter=',')
 				else:
 					np.savetxt(f1,np.vstack([c1,gr.robot_position_odom[-1]]),delimiter=',')
-					np.savetxt(f2,np.vstack([c2,gr.robot_position_gps[-1]]),delimiter=',')
 
 				print(c1)
 	else:
@@ -132,9 +128,9 @@ if __name__ == "__main__":
 				break
 
 		ekf = np.stack(gr.robot_position_odom)[::subsample_rate]
-		gps = np.stack(gr.robot_position_gps)[::subsample_rate]
-		np.savetxt(f1, ekf)
-		np.savetxt(f2, gps)
+		# gps = np.stack(gr.robot_position_gps)[::subsample_rate]
+		np.savetxt(f1, ekf, delimiter=',')
+		# np.savetxt(f2, gps)
 		print('Saved subsampled trajectories')
 	
 	rospy.spin()

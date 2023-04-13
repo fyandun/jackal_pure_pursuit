@@ -39,13 +39,12 @@ class pure_pursuit_node_class:
 
 		self.waypoint_path = rospy.get_param('/waypoints_path','waypts.npy')
 		self.waypts = np.loadtxt(self.waypoint_path,delimiter=',')
+		print('Following waypoints from: ', self.waypoint_path)
 
 		self.markerVisualization_obj = utils_viz.markerVisualization()
 
 		lookahead_dist = rospy.get_param('/lookahead',1.5)
 		self.ppc = PurePursuitController(self.waypts, lookahead_dist)
-
-		#rospy.loginfo_once(f'Initialized Pure Pursuit Controller with {self.waypts.shape[0]} waypoints and lookahead distance {self.ppc.lookahead}')
 
 		self.clock_now = 0
 		self.clock_last_motion_update = 0
@@ -63,25 +62,22 @@ class pure_pursuit_node_class:
 		# _, _, yaw = euler_from_quaternion(r_quaternion_list,'xyzs')
 		# r_quaternion_list = [r_quaternion.w, r_quaternion.x, r_quaternion.y, r_quaternion.z]
 
-		# if (self.clock_now - self.clock_last_rviz_update > 10):
-		# 	self.markerVisualization_obj.publish_marker_waypts(self.waypts)
-		# 	self.markerVisualization_obj.publish_lines_waypts(self.waypts)
-		# 	self.markerVisualization_obj.publish_marker_robot_pose(data.pose.pose)
-		# 	self.markerVisualization_obj.publish_marker_lookahead_circle(data.pose.pose, self.ppc.lookahead)
-		# 	self.markerVisualization_obj.publish_marker_goal(self.ppc.cur_goal_point)
-		# 	self.markerVisualization_obj.publish_marker_pts_curv(self.waypts,self.ppc.waypts_curvature)
-		# 	self.clock_last_rviz_update = self.clock_now
+		self.markerVisualization_obj.publish_marker_waypts(self.waypts)
+		self.markerVisualization_obj.publish_lines_waypts(self.waypts)
+		self.markerVisualization_obj.publish_marker_robot_pose(data.pose.pose)
+		self.markerVisualization_obj.publish_marker_lookahead_circle(data.pose.pose, self.ppc.lookahead)
+		self.markerVisualization_obj.publish_marker_goal(self.ppc.cur_goal_point)
+		self.markerVisualization_obj.publish_marker_pts_curv(self.waypts,self.ppc.waypts_curvature)
 
-		#if (self.clock_now - self.clock_last_motion_update > 10):
-		print('=================== ODOM CALLBACK START ==================')
+		# print('=================== ODOM CALLBACK START ==================')
 		self.ppc.update_pos(robot_pose.x, robot_pose.y, yaw)
-		print('x: ', robot_pose.x, ' y: ', robot_pose.y, ' yaw: ', yaw)
+		# print('x: ', robot_pose.x, ' y: ', robot_pose.y, ' yaw: ', yaw)
 		self.ppc.find_lookahead_pt()
-		print('Lookahead point: ', self.ppc.cur_goal_point)
+		# print('Lookahead point: ', self.ppc.cur_goal_point)
 		self.ppc.find_curvature()
-		print('Curvature: ', self.ppc.curvature)
+		# print('Curvature: ', self.ppc.curvature)
 		x_vel, ang_vel = self.ppc.motion_update()
-		print('Cmd vel lin x: ', x_vel, 'Cmd vel ang z: ', ang_vel)
+		# print('Cmd vel lin x: ', x_vel, 'Cmd vel ang z: ', ang_vel)
 		self.ppc.check_reset()
 
 			# twist = Twist(
@@ -94,9 +90,9 @@ class pure_pursuit_node_class:
 		)
 
 		self.pub_cmd_vel.publish(twist)
-			# self.pub_curvature.publish(self.ppc.curvature)
-		self.clock_last_motion_update = self.clock_now
-		print('=================== ODOM CALLBACK END ==================')
+		self.pub_curvature.publish(self.ppc.curvature2)
+		# self.clock_last_motion_update = self.clock_now
+		# print('=================== ODOM CALLBACK END ==================')
 
 
 if __name__ == '__main__':

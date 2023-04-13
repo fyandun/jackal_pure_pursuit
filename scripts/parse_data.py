@@ -76,10 +76,12 @@ def read_bagfile(bagfile,topics=None):
             data[k] = np.stack(v)
     return data
 
-def plot_odom_vs_gps(bagfile):
-    data = read_bagfile(bagfile,topics=['/odom','/odometry/filtered'])
+def plot_odom_vs_waypoints(bagfile,waypoints):
+    data = read_bagfile(bagfile,topics=['/odometry/filtered'])
+    w = np.loadtxt(waypoints, delimiter=',')
 
     _, ax = plt.subplots(1,1)
+    plt.scatter(w[:,0],w[:,1],color='r',marker='x',label='waypoints')
     ax.plot(data['/odom'][:,0],data['/odom'][:,1],label='GPS')
     ax.plot(data['/odometry_filtered'][:,0],data['/odometry/filtered'][:,1],label='EKF')
     plt.legend()

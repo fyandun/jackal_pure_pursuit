@@ -77,15 +77,45 @@ def read_bagfile(bagfile,topics=None):
             data[k] = np.stack(v)
     return data
 
-def plot_odom_vs_waypoints(bagfile,waypoints):
-    data = read_bagfile(bagfile,topics=['/gps/rtkfix'])
+def plot_odom_vs_waypoints(bagfile, waypoints):
+    data = read_bagfile(bagfile,topics=['/odometry/filtered','/gps/rtkfix'])
     w = np.loadtxt(waypoints, delimiter=',')
-
     _, ax = plt.subplots(1,1)
     plt.scatter(w[:,0],w[:,1],color='r',marker='x',label='waypoints')
     ax.plot(data['/gps/rtkfix'][:,0],data['/gps/rtkfix'][:,1],label='GPS')
+    # ax.plot(data['/odometry/filtered'][:,0],data['/odometry/filtered'][:,1],label='EKF')
     plt.legend()
+    plt.ion()
     plt.show()
+
+def plot_odom_vs_waypoints_data(data, wf):
+    w = np.loadtxt(wf, delimiter=',')
+    _, ax = plt.subplots(1,1)
+    plt.scatter(w[:,0],w[:,1],color='r',marker='x',label='waypoints')
+    ax.plot(data['/gps/rtkfix'][:,0],data['/gps/rtkfix'][:,1],label='GPS')
+    # ax.plot(data['/odom'][:,0],data['/odom'][:,1],label='GPS')
+    # ax.plot(data['/odometry/filtered'][:,0],data['/odometry/filtered'][:,1],label='EKF')
+    plt.legend()
+    plt.ion()
+    plt.show()
+
+def hacky_cte(data,w):
+    n = 0
+    total_cte = 0
+    for i, waypoint in enumerate(w):
+        # if i < 3 or (i > 18 and i < 35) or i > 50:
+        # if i > 22:
+        #     continue
+        total_cte += np.min(np.linalg.norm(data-waypoint,axis=1))
+        n += 1
+    return total_cte/n
+
+def clean_odom(odom):
+    cleaned_odom = odom[:,:2].copy()
+    mask = np.where(np.linalg.norm(np.diff(odom[:,:2],axis=0),axis=1) > 5)[0]
+    mask = mask[::2]
+    cleaned_odom[mask+1] = odom[mask]
+    return cleaned_odom
 
 if __name__ == '__main__':
 
@@ -93,7 +123,11 @@ if __name__ == '__main__':
     wf = sys.argv[2]
     plot_odom_vs_waypoints(bf,wf)
     # bag = rosbag.Bag('../data/pure_pursuit.bag')
+    bf = '../data/2023-04-14-Florida/2023-04-14_l1p5_odomfilt_offaxis_loop_socat_driver_shifted_2.bag'
+    wf = '../data/2023-04-14-Florida/2023-04-14_misaligned_loop_socat_driver_shifted.txt'
 
+    data = read_bagfile(bf, topics=['/odometry/filtered','/gps/rtkfix'])
+    plot_odom_vs_waypoints(bf,wf)
     # topics = ['/odometry/filtered', '/cmd_vel']
     # info = bag.get_type_and_topic_info(topics)
 

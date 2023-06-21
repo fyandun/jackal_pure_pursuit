@@ -4,6 +4,7 @@ import numpy as np
 from visualization_msgs.msg import MarkerArray, Marker
 import geometry_msgs.msg
 from geometry_msgs.msg import Point
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 class markerVisualization():
 
@@ -39,10 +40,16 @@ class markerVisualization():
 			marker.scale.y = 0.5
 			marker.scale.z = 0.05
 
-			marker.color.r = 0.0
-			marker.color.g = 1.0
-			marker.color.b = 0.0
-			marker.color.a = 1.0
+			if i == 0:
+				marker.color.r = 1.0
+				marker.color.g = 0.0
+				marker.color.b = 0.0
+				marker.color.a = 1.0
+			else:
+				marker.color.r = 0.0
+				marker.color.g = 1.0
+				marker.color.b = 0.0
+				marker.color.a = 1.0
 
 			marker.pose.position.x = waypoint[0]
 			marker.pose.position.y = waypoint[1]
@@ -118,6 +125,18 @@ class markerVisualization():
 		marker.color.a = 1
 
 		marker.pose = robot_pose
+		#robot_orientation = robot_pose.orientation
+
+		#r_quaternion_list = [robot_orientation.x, robot_orientation.y, robot_orientation.z, robot_orientation.w]
+		#_, _, yaw = euler_from_quaternion(r_quaternion_list)
+		#yaw += np.radians(90)
+
+		#q = quaternion_from_euler(0,0,yaw)
+
+		#marker.pose.orientation.x = q[0]
+		#marker.pose.orientation.y = q[1]
+		#marker.pose.orientation.z = q[2]
+		#marker.pose.orientation.w = q[3]
 		
 		marker.lifetime = rospy.Duration(0)
 		markers_array.append(marker)

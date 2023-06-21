@@ -2,6 +2,7 @@ import rosbag
 import numpy as np
 from tf.transformations import euler_from_quaternion
 from matplotlib import pyplot as plt
+import sys
 
 def cmd_vel_to_arr(msg):
     return np.array([
@@ -77,17 +78,20 @@ def read_bagfile(bagfile,topics=None):
     return data
 
 def plot_odom_vs_waypoints(bagfile,waypoints):
-    data = read_bagfile(bagfile,topics=['/odometry/filtered'])
+    data = read_bagfile(bagfile,topics=['/gps/rtkfix'])
     w = np.loadtxt(waypoints, delimiter=',')
 
     _, ax = plt.subplots(1,1)
     plt.scatter(w[:,0],w[:,1],color='r',marker='x',label='waypoints')
-    ax.plot(data['/odom'][:,0],data['/odom'][:,1],label='GPS')
-    ax.plot(data['/odometry_filtered'][:,0],data['/odometry/filtered'][:,1],label='EKF')
+    ax.plot(data['/gps/rtkfix'][:,0],data['/gps/rtkfix'][:,1],label='GPS')
     plt.legend()
     plt.show()
 
 if __name__ == '__main__':
+
+    bf = sys.argv[1]
+    wf = sys.argv[2]
+    plot_odom_vs_waypoints(bf,wf)
     # bag = rosbag.Bag('../data/pure_pursuit.bag')
 
     # topics = ['/odometry/filtered', '/cmd_vel']
@@ -123,13 +127,12 @@ if __name__ == '__main__':
     # ax2.plot(cmd_vel[:,1], label='curvature')
     # ax2.legend()
 
-    plt.show()
+    # plt.show()
 
     def extract_odom(bagfile):
         bag = rosbag.Bag(bagfile)
         info = bag.get_type_and_topic_info('/odometry/filtered')
         odom = np.zeros((info[1]['/odometry/filtered'].message_count,3)) # x, y, yaw
-
         i = 0
         for topic, msg, t in bag.read_messages(topics='/odometry/filtered'):
             robot_pose = msg.pose.pose.position
@@ -139,36 +142,37 @@ if __name__ == '__main__':
             i += 1
 
         return odom
+
     
     # code up a pure pursuit line follower
 
     ######
-    w = np.loadtxt('../data/apr4_manual.txt',delimiter=',')
+    #w = np.loadtxt('../data/apr4_manual.txt',delimiter=',')
     # odom1 = extract_odom('../data/apr4_oval_3_manual_waypoints_l1p5.bag')
-    odom2 = extract_odom('../data/apr4_oval_3_manual_waypoints.bag')
+    #odom2 = extract_odom('../data/apr4_oval_3_manual_waypoints.bag')
     # odom3 = extract_odom('../data/apr4_oval_4_manual_waypoints_l1p5.bag')
-    odom4 = extract_odom('../data/apr4_oval_5_manual_waypoints_l1p5.bag')
+    #odom4 = extract_odom('../data/apr4_oval_5_manual_waypoints_l1p5.bag')
 
-    odom5 = extract_odom('../data/pure_pursuit.bag')
-    fig, ax2 = plt.subplots(1,1)
-    ax2.plot(odom5[:,0],odom5[:,1])
-    plt.show()
+    #odom5 = extract_odom('../data/pure_pursuit.bag')
+    #fig, ax2 = plt.subplots(1,1)
+    #ax2.plot(odom5[:,0],odom5[:,1])
+    #plt.show()
 
 
-    fig1, ax1 = plt.subplots(1,1)
-    ax1.scatter(w[:,0],w[:,1],marker='x',color='r')
-    # ax1.plot(odom1[:,0],odom1[:,1],label='1')
-    ax1.plot(odom2[:,0],odom2[:,1],label='l=1')
+    #fig1, ax1 = plt.subplots(1,1)
+    #ax1.scatter(w[:,0],w[:,1],marker='x',color='r')
+    ## ax1.plot(odom1[:,0],odom1[:,1],label='1')
+    #ax1.plot(odom2[:,0],odom2[:,1],label='l=1')
     # for row in odom2:
     #     ax1.arrow(row[0],row[1],np.cos(row[2]),np.sin(row[2]))
     # ax1.plot(odom3[:,0],odom3[:,1],label='3')
-    ax1.plot(odom4[:,0],odom4[:,1],label='l=1.5')
+    #ax1.plot(odom4[:,0],odom4[:,1],label='l=1.5')
     # ax1.arrow(odom4[:,0],odom4[:,1],np.cos(odom4[:,2]),np.sin(odom4[:,2]))
-    plt.legend()
-    plt.show()
+    #plt.legend()
+    #plt.show()
 
-w2 = np.loadtxt('../data/apr3.txt',delimiter=',')
-fig1, ax3 = plt.subplots(1,1)
-ax1.scatter(w2[:,0],w2[:,1],marker='x',color='r')
+#w2 = np.loadtxt('../data/apr3.txt',delimiter=',')
+#fig1, ax3 = plt.subplots(1,1)
+#ax1.scatter(w2[:,0],w2[:,1],marker='x',color='r')
     
     

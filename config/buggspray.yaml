@@ -1,2 +1,2 @@
-waypoints_path: '/home/rohan/projects/src/jackal_pure_pursuit/src/waypts.npy'
+waypoints_path: '/home/bumblebee/projects/src/jackal_pure_pursuit/scripts/data/2023-06-09/2023-06-09_oval_nearbase_q4q1_gps.txt'
 lookahead: 1.5

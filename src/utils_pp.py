@@ -52,6 +52,7 @@ class PurePursuitController():
 		self.arc_c = self.waypts[0]
 		self.curvature = 0
 		self.curvature2 = 0
+		self.alpha = 0.
 
 		self.dt = 0.050
 
@@ -61,6 +62,7 @@ class PurePursuitController():
 		self.ang_vel_thresh = 2
 
 		self.reset_flag = True
+		self.done = False
 
 		self.waypts_curvature = [0]
 		self.find_pt_to_pt_curvature()
@@ -165,6 +167,8 @@ class PurePursuitController():
 				break
 			tmp_index += 1
 
+		if tmp_index >= self.num_waypts:
+			self.done = True
 		return self.cur_goal_point
 
 	def find_curvature(self):
@@ -182,6 +186,8 @@ class PurePursuitController():
 		self.curvature = 2*N/np.square(self.lookahead)*side
 
 		alpha = angle_bw_vectors(self.cur_goal_point-self.xy_pos(), self.heading_vector())
+		self.alpha = alpha
+		print(np.degrees(alpha*side))
 		self.curvature2 = 2*np.sin(alpha)/self.lookahead*side
 
 	def motion_update(self):		
@@ -199,17 +205,21 @@ class PurePursuitController():
 		# self.y_pos = self.y_pos+self.target_vel*np.sin(self.theta)*self.dt
 
 		self.ang_vel = np.clip(self.ang_vel, -self.ang_vel_thresh, self.ang_vel_thresh)
+		# if self.done:
+		# 	self.curvature2 = 0
+		# 	return 0, 0
 
 		return self.target_vel*vel_decay, self.ang_vel
 
 	def check_reset(self):
 		if (np.linalg.norm(self.xy_pos()-self.waypts[-1])<0.5):
-			self.reset_flag = True
+			self.done = True
+			#self.reset_flag = True
 			# self.x_pos = self.pt_pos[0]
 			# self.y_pos = self.pt_pos[1]
 			# self.theta = self.angle_bw_2lines(np.array([self.waypts[0][0]+1,self.waypts[0][1]]),self.waypts[0], self.waypts[1])
-			self.cur_goal_point = self.waypts[0]
-			self.index = 0
-			self.running_index = 0
+			#self.cur_goal_point = self.waypts[0]
+			#self.index = 0
+			#self.running_index = 0
 
 

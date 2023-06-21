@@ -3,7 +3,8 @@
 import rospy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
-from move_base_msgs.msg import MoveBaseActionGoal
+# from sensor_msgs.msg import Imu
+# from move_base_msgs.msg import MoveBaseActionGoal
 from rosgraph_msgs.msg import Clock
 import numpy as np
 import time
@@ -48,8 +49,9 @@ class Goal_reacher:
 		self.robot_position_gps = []
 		self.curr_time = Clock()
 		self.sub = rospy.Subscriber('/odometry/filtered', Odometry, self.callback)
-		# self.sub1 = rospy.Subscriber('/odom', Odometry, self.callback1)
+		self.sub1 = rospy.Subscriber('/gps/rtkfix', Odometry, self.callback1)
 		self.sub2 = rospy.Subscriber('/clock', Clock, self.callback2 )
+		# self.sub3 = rospy.Subscriber('/imu/data', Imu, self.callback_yaw)
 		#self.sub3 = rospy.Subscriber('move_base/status', GoalStatusArray, self.callback3)
 	
 		self.pub = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=10)
@@ -70,7 +72,6 @@ class Goal_reacher:
 		self.robot_position_odom.append([data.pose.pose.position.x, data.pose.pose.position.y])#,0,0,data.pose.pose.orientation.z, data.pose.pose.orientation.w]
 	
 	def callback1(self, data):
-		# Confusing, but the new GPS driver publishes to /odom, not /gps/rtkfix
 		self.robot_position_gps.append([data.pose.pose.position.x, data.pose.pose.position.y])#,0,0,data.pose.pose.orientation.z, data.pose.pose.orientation.w]
 	
 	def callback2(self, data):
@@ -102,17 +103,18 @@ class Goal_reacher:
 		
 
 if __name__ == "__main__":
-
-	f1 = 'points_odom.txt'
+	
+	# f1 = 'data/2023-05-26/2023-05-26_flagstaff_oval_ekf.txt'
+	f2 = 'data/2023-06-09/2023-06-09_oval_nearbase_q4q1_gps.txt'
 
 	mode = 'subsample'
-	subsample_rate = 100
+	subsample_rate = 20
 
 	gr = Goal_reacher()
 	rospy.init_node('goal_reacher', anonymous=True)
 	if mode == 'capture':
 		while True:
-			x = input('Save_point?')
+			x = input('Save_point?')	
 			if x == 'y':
 				c1 = np.loadtxt(f1,delimiter=',')
 				if(len(c1) == 0):
@@ -127,10 +129,10 @@ if __name__ == "__main__":
 			if x == 'y':
 				break
 
-		ekf = np.stack(gr.robot_position_odom)[::subsample_rate]
-		# gps = np.stack(gr.robot_position_gps)[::subsample_rate]
-		np.savetxt(f1, ekf, delimiter=',')
-		# np.savetxt(f2, gps)
+		# ekf = np.stack(gr.robot_position_odom)[::subsample_rate]
+		gps = np.stack(gr.robot_position_gps)[::subsample_rate]
+		# np.savetxt(f1, ekf, delimiter=',')
+		np.savetxt(f2, gps,delimiter=',')
 		print('Saved subsampled trajectories')
 	
 	rospy.spin()
